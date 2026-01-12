@@ -10,7 +10,7 @@ import { PLACEHOLDERS } from "@/lib/common-utils";
 import { cn } from "@/lib/utils";
 
 interface ConversationWithProfile extends Conversation {
-  otherUser: UserProfile; // always defined after filtering
+  otherUser?: UserProfile | null;
 }
 
 interface ConversationListProps {
@@ -19,12 +19,10 @@ interface ConversationListProps {
     conversationId: string,
     otherUser: UserProfile
   ) => void;
-  className?: string;
 }
 
 export default function ConversationList({
   user,
-  className,
   onSelectConversation,
 }: ConversationListProps) {
   const [conversations, setConversations] = useState<ConversationWithProfile[]>(
@@ -42,40 +40,23 @@ export default function ConversationList({
         const convWithProfiles = await Promise.all(
           newConversations.map(async (conv) => {
             const otherUserId = conv.participants.find((id) => id !== user.uid);
-            if (!otherUserId) return null;
-
-            const firebaseUser = await getUserProfile(otherUserId);
-            if (!firebaseUser) return null;
-
-            // Map Firebase UserProfile to your local UserProfile type
-            const otherUser: UserProfile = {
-              uid: firebaseUser.uid,
-              name: firebaseUser.name,
-              email: firebaseUser.email,
-              age: firebaseUser.age,
-              photos: firebaseUser.photos || [],
-              isOnline: firebaseUser.isOnline || false,
-              // add any other fields your UserProfile expects
+            const otherUser = otherUserId
+              ? await getUserProfile(otherUserId)
+              : undefined;
+            return {
+              ...conv,
+              otherUser: otherUser as UserProfile | null | undefined,
             };
-
-            return { ...conv, otherUser };
           })
         );
 
-        // Remove nulls (failed fetches) and narrow types
-        const validConversations: ConversationWithProfile[] =
-          convWithProfiles.filter(
-            (c): c is ConversationWithProfile => c !== null
-          );
-
-        // Sort by last message time descending
-        validConversations.sort((a, b) => {
+        convWithProfiles.sort((a, b) => {
           const ta = a.lastMessageTime?.toMillis?.() ?? 0;
           const tb = b.lastMessageTime?.toMillis?.() ?? 0;
           return tb - ta;
         });
 
-        setConversations(validConversations);
+        setConversations(convWithProfiles);
         setLoading(false);
       }
     );
@@ -84,25 +65,12 @@ export default function ConversationList({
   }, [user?.uid]);
 
   const filteredConversations = conversations.filter((c) =>
-    c.otherUser.name.toLowerCase().includes(searchQuery.toLowerCase())
+    c.otherUser?.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  type TimestampLike =
-    | { toDate: () => Date }
-    | Date
-    | number
-    | null
-    | undefined;
-  const isTimestampWithToDate = (t: unknown): t is { toDate: () => Date } =>
-    !!t && typeof (t as { toDate?: unknown }).toDate === "function";
-
-  const formatTime = (timestamp: TimestampLike): string => {
+  const formatTime = (timestamp: any) => {
     if (!timestamp) return "";
-    const date = isTimestampWithToDate(timestamp)
-      ? timestamp.toDate()
-      : timestamp instanceof Date
-      ? timestamp
-      : new Date(timestamp as number);
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMin = Math.floor(diffMs / 60000);
@@ -131,7 +99,7 @@ export default function ConversationList({
               <div className="relative w-24 h-24 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-indigo-600/40">
                 <Heart
                   className="w-12 h-12 text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.7)]"
-                  fill="currentColor"
+                  fill="white"
                 />
               </div>
             </div>
@@ -151,12 +119,7 @@ export default function ConversationList({
   }
 
   return (
-    <div
-      className={cn(
-        "h-screen bg-gradient-to-b from-slate-950 via-indigo-950 to-purple-950 flex flex-col",
-        className
-      )}
-    >
+    <div className="h-screen bg-gradient-to-b from-slate-950 via-indigo-950 to-purple-950 flex flex-col">
       {/* Header */}
       <div className="bg-black/30 backdrop-blur-xl border-b border-white/5 sticky top-0 z-20">
         <div className="px-4 pt-5 pb-3 max-w-3xl mx-auto">
@@ -212,12 +175,12 @@ export default function ConversationList({
           <div className="space-y-2 max-w-3xl mx-auto">
             {filteredConversations.map((conv) => {
               const other = conv.otherUser;
-              const hasUnread = conv.unreadCount && conv.unreadCount > 0;
+              const hasUnread = (conv.unreadCount?.[user.uid] ?? 0) > 0;
 
               return (
                 <button
                   key={conv.id}
-                  onClick={() => onSelectConversation(conv.id, other)}
+                  onClick={() => other && onSelectConversation(conv.id, other)}
                   className={cn(
                     "w-full group flex items-center gap-4 p-4 rounded-2xl transition-all duration-200",
                     "bg-white/5 hover:bg-white/10 border border-white/5",
@@ -228,16 +191,16 @@ export default function ConversationList({
                   <div className="relative shrink-0">
                     <Avatar className="w-16 h-16 border-2 border-black/40 shadow-xl shadow-black/30">
                       <AvatarImage
-                        src={other.photos?.[0] || PLACEHOLDERS.AVATAR}
-                        alt={other.name}
+                        src={other?.photos?.[0] || PLACEHOLDERS.AVATAR}
+                        alt={other?.name}
                         className="object-cover"
                       />
                       <AvatarFallback className="bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-semibold">
-                        {other.name[0] || "?"}
+                        {other?.name?.[0] || "?"}
                       </AvatarFallback>
                     </Avatar>
 
-                    {other.isOnline && (
+                    {other?.isOnline && (
                       <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-emerald-500 border-2 border-black rounded-full shadow-lg shadow-emerald-900/40" />
                     )}
                   </div>
@@ -250,7 +213,7 @@ export default function ConversationList({
                           hasUnread ? "text-white" : "text-white/90"
                         )}
                       >
-                        {other.name}
+                        {other?.name || "Deleted User"}
                       </h3>
                       <span className="text-xs text-white/40 shrink-0 font-medium">
                         {formatTime(conv.lastMessageTime)}
