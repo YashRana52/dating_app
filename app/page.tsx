@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -26,49 +27,43 @@ function Home() {
   const [activeTab, setActiveTab] = useActiveTab("activeTab", "discovery");
 
   /**
-   * 🔐 AUTH + PROFILE GUARD
+   * 🔐 AUTH + PROFILE GUARD (ONLY PLACE FOR REDIRECT)
    */
   useEffect(() => {
     if (authLoading || profileLoading) return;
 
-    // ❌ Not logged in → Login
     if (!user) {
       router.replace("/login");
       return;
     }
 
-    // ❌ Logged in but profile missing → Onboarding
-    if (!profile) {
+    if (user && !profile) {
       router.replace("/user-onboarding");
-      return;
     }
   }, [user, profile, authLoading, profileLoading, router]);
 
   /**
-   * ⏳ Loading / Redirect State
+   * ⏳ Loading state
    */
   if (authLoading || profileLoading) {
     return <Loader message="Loading..." />;
   }
 
-  if (!user) {
-    return <Loader message="Redirecting to login..." />;
-  }
-
-  if (!profile) {
-    return <Loader message="Redirecting to profile setup..." />;
+  /**
+   * 🚫 While redirecting (VERY IMPORTANT)
+   */
+  if (!user || !profile) {
+    return null;
   }
 
   /**
-   * 🔄 Profile Update Handler
+   * 🔄 Profile Update
    */
   const handleProfileUpdate = async (updated: Partial<UserProfile>) => {
-    if (!user.uid) return;
-
     try {
       await updateDoc(doc(db, "users", user.uid), updated);
-    } catch (error) {
-      console.error("Error updating user profile:", error);
+    } catch (err) {
+      console.error("Profile update error:", err);
     }
   };
 
