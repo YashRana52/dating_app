@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 
 import Loader from "@/components/Loader";
 import MainLayout from "@/components/mainLayout";
@@ -69,7 +70,7 @@ function Home() {
   };
 
   // Tabs Content
-  const tabs: Record<string, JSX.Element> = {
+  const tabs: Record<string, React.ReactNode> = {
     messages: <MessagePage user={user} />,
     discovery: <DiscoveryPage user={user} onSelectMatch={handleSelectMatch} />,
     matches: <MatchesPage user={user} onSelectMatch={handleSelectMatch} />,
