@@ -2,6 +2,7 @@
 
 import Chat from "@/components/chatPage/Chat";
 import ConversationList from "@/components/chatPage/ConversationList";
+
 import { SelectedConversation, UserProfile } from "@/lib/types";
 import { User } from "firebase/auth";
 import { Heart } from "lucide-react";
@@ -98,11 +99,12 @@ function MessagePage({ user }: MessagePageProps) {
       {/*  SIDEBAR  */}
       <aside className="hidden md:flex w-[380px] lg:w-[420px] flex-col border-r border-pink-100/60 bg-white/50 backdrop-blur-xl">
         {/* Conversation List */}
-        <ConversationList
-          user={user}
-          onSelectConversation={handleSelectConversation}
-          className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-pink-300/50 hover:scrollbar-thumb-pink-400"
-        />
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-pink-300/50 hover:scrollbar-thumb-pink-400">
+          <ConversationList
+            user={user}
+            onSelectConversation={handleSelectConversation}
+          />
+        </div>
       </aside>
 
       {/* CHAT AREA  */}
