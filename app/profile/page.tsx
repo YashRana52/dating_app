@@ -1,6 +1,7 @@
+"use client";
+
 import EditProfileModal from "@/components/EditProfileModal";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+
 import {
   calculateProfileCompletion,
   localStorageUtils,

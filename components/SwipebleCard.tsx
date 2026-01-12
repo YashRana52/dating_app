@@ -1,9 +1,9 @@
+"use client";
 import { UserProfile } from "@/lib/types";
 import React, { useState } from "react";
-import { Card } from "./ui/card";
+
 import { formatUtils, PLACEHOLDERS } from "@/lib/common-utils";
 import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
-import { Badge } from "./ui/badge";
 
 interface SwipebleCardProps {
   profile: UserProfile;

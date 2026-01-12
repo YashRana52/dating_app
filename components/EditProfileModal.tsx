@@ -1,3 +1,4 @@
+"use client";
 import { UserProfile } from "@/lib/types";
 import React, { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
@@ -5,7 +6,7 @@ import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Input } from "./ui/input";
-import { Badge, Plus, X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import {
   DIET_OPTIONS,
   DRINKING_OPTIONS,
