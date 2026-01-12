@@ -351,7 +351,7 @@ export default function PremiumChat({
                           isOwn ? "ml-auto" : ""
                         )}
                       >
-                        {Object.keys(msg.reactions).map((e) => (
+                        {Object.keys(msg.reactions ?? {}).map((e) => (
                           <span key={e}>{e}</span>
                         ))}
                       </div>
