@@ -19,10 +19,12 @@ interface ConversationListProps {
     conversationId: string,
     otherUser: UserProfile
   ) => void;
+  className?: string;
 }
 
 export default function ConversationList({
   user,
+  className,
   onSelectConversation,
 }: ConversationListProps) {
   const [conversations, setConversations] = useState<ConversationWithProfile[]>(
@@ -47,13 +49,17 @@ export default function ConversationList({
           })
         );
 
-        convWithProfiles.sort((a, b) => {
+        // Filter out conversations with null otherUser and sort by last message time descending
+        const validConversations = convWithProfiles.filter(
+          (conv) => conv.otherUser !== null
+        );
+        validConversations.sort((a, b) => {
           const ta = a.lastMessageTime?.toMillis?.() ?? 0;
           const tb = b.lastMessageTime?.toMillis?.() ?? 0;
           return tb - ta;
         });
 
-        setConversations(convWithProfiles);
+        setConversations(validConversations);
         setLoading(false);
       }
     );
@@ -96,7 +102,7 @@ export default function ConversationList({
               <div className="relative w-24 h-24 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-indigo-600/40">
                 <Heart
                   className="w-12 h-12 text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.7)]"
-                  fill="white"
+                  fill="currentColor"
                 />
               </div>
             </div>
@@ -116,7 +122,12 @@ export default function ConversationList({
   }
 
   return (
-    <div className="h-screen bg-gradient-to-b from-slate-950 via-indigo-950 to-purple-950 flex flex-col">
+    <div
+      className={cn(
+        "h-screen bg-gradient-to-b from-slate-950 via-indigo-950 to-purple-950 flex flex-col",
+        className
+      )}
+    >
       {/* Header */}
       <div className="bg-black/30 backdrop-blur-xl border-b border-white/5 sticky top-0 z-20">
         <div className="px-4 pt-5 pb-3 max-w-3xl mx-auto">
