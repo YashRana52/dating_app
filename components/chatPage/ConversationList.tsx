@@ -10,7 +10,7 @@ import { PLACEHOLDERS } from "@/lib/common-utils";
 import { cn } from "@/lib/utils";
 
 interface ConversationWithProfile extends Conversation {
-  otherUser: UserProfile; // ✅ now always defined after filtering
+  otherUser: UserProfile; // always defined after filtering
 }
 
 interface ConversationListProps {
@@ -42,21 +42,31 @@ export default function ConversationList({
         const convWithProfiles = await Promise.all(
           newConversations.map(async (conv) => {
             const otherUserId = conv.participants.find((id) => id !== user.uid);
-            const otherUser = otherUserId
-              ? await getUserProfile(otherUserId)
-              : undefined;
+            if (!otherUserId) return null;
+
+            const firebaseUser = await getUserProfile(otherUserId);
+            if (!firebaseUser) return null;
+
+            // Map Firebase UserProfile to your local UserProfile type
+            const otherUser: UserProfile = {
+              uid: firebaseUser.uid,
+              name: firebaseUser.name,
+              email: firebaseUser.email,
+              age: firebaseUser.age,
+              photos: firebaseUser.photos || [],
+              isOnline: firebaseUser.isOnline || false,
+              // add any other fields your UserProfile expects
+            };
+
             return { ...conv, otherUser };
           })
         );
 
-        // Filter out null/undefined otherUser & narrow types
-        const hasUserProfile = (
-          conv: Conversation & { otherUser?: UserProfile | null }
-        ): conv is Conversation & { otherUser: UserProfile } => {
-          return conv.otherUser != null;
-        };
-
-        const validConversations = convWithProfiles.filter(hasUserProfile);
+        // Remove nulls (failed fetches) and narrow types
+        const validConversations: ConversationWithProfile[] =
+          convWithProfiles.filter(
+            (c): c is ConversationWithProfile => c !== null
+          );
 
         // Sort by last message time descending
         validConversations.sort((a, b) => {
@@ -65,10 +75,7 @@ export default function ConversationList({
           return tb - ta;
         });
 
-        // validConversations is narrowed by hasUserProfile above; assert via unknown to satisfy TS
-        setConversations(
-          validConversations as unknown as ConversationWithProfile[]
-        );
+        setConversations(validConversations);
         setLoading(false);
       }
     );
@@ -86,7 +93,6 @@ export default function ConversationList({
     | number
     | null
     | undefined;
-
   const isTimestampWithToDate = (t: unknown): t is { toDate: () => Date } =>
     !!t && typeof (t as { toDate?: unknown }).toDate === "function";
 
