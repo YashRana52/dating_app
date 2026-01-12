@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { User } from "firebase/auth";
 import { Heart, RefreshCw } from "lucide-react";

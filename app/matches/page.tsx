@@ -1,14 +1,17 @@
+"use client";
+
 import { useDiscovery } from "@/hooks/useDiscovery";
 import { UserProfile } from "@/lib/types";
 import { User } from "firebase/auth";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
-import ProfilePage from "../profile/page";
+
 import { Eye, Heart, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 import { PLACEHOLDERS } from "@/lib/common-utils";
 import { getOrCreateConversation } from "@/hooks/firebase-chat";
+import ProfilePage from "../profile/page";
 
 interface MatchPageProps {
   user: User;
