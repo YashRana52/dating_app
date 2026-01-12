@@ -365,7 +365,7 @@ export default function PremiumChat({
                           variant="ghost"
                           className="h-8 w-8 bg-black/60 backdrop-blur-md hover:bg-red-900/50"
                           style={{ marginLeft: "-3.75rem" }}
-                          onClick={() => deleteMessage(conversationId, msg.id)}
+                          onClick={() => deleteMessage(msg.id)}
                         >
                           <Trash2 size={16} />
                         </Button>
