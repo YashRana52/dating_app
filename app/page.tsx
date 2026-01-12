@@ -3,7 +3,6 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import Loader from "@/components/Loader";
 import MainLayout from "@/components/mainLayout";
 import { useActiveTab } from "@/hooks/useActiveTab";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
@@ -41,13 +40,6 @@ function Home() {
       router.replace("/user-onboarding");
     }
   }, [user, profile, authLoading, profileLoading, router]);
-
-  /**
-   * ⏳ Loading state
-   */
-  if (authLoading || profileLoading) {
-    return <Loader message="Loading..." />;
-  }
 
   /**
    * 🚫 While redirecting (VERY IMPORTANT)
