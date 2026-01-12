@@ -1,12 +1,13 @@
 "use client";
+import React from "react";
 
-import React, { useEffect } from "react";
-import { useRouter } from "next/navigation";
-
+import Loader from "@/components/Loader";
 import MainLayout from "@/components/mainLayout";
 import { useActiveTab } from "@/hooks/useActiveTab";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 import MessagePage from "./message/page";
 import DiscoveryPage from "./discovery/page";
@@ -25,9 +26,7 @@ function Home() {
 
   const [activeTab, setActiveTab] = useActiveTab("activeTab", "discovery");
 
-  /**
-   * 🔐 AUTH + PROFILE GUARD (ONLY PLACE FOR REDIRECT)
-   */
+  // Auth + Profile Guard
   useEffect(() => {
     if (authLoading || profileLoading) return;
 
@@ -36,34 +35,41 @@ function Home() {
       return;
     }
 
+    // Agar user hai lekin profile document nahi exist karta → onboarding pe bhejo
     if (user && !profile) {
       router.replace("/user-onboarding");
+      return;
     }
   }, [user, profile, authLoading, profileLoading, router]);
 
-  /**
-   * 🚫 While redirecting (VERY IMPORTANT)
-   */
-  if (!user || !profile) {
-    return null;
+  const handleSelectMatch = () => setActiveTab("messages");
+
+  // Loading / Redirect State
+  if (authLoading || profileLoading || !user || !profile) {
+    const message = !user
+      ? "Redirecting to login..."
+      : !profile
+      ? "Redirecting to profile setup..."
+      : "Loading your profile...";
+
+    return <Loader message={message} />;
   }
 
-  /**
-   * 🔄 Profile Update
-   */
+  // Profile Update Handler – Direct Firestore Update (No local onboarding state)
   const handleProfileUpdate = async (updated: Partial<UserProfile>) => {
+    if (!user?.uid) return;
+
+    const userRef = doc(db, "users", user.uid); // Fixed: "users" collection
+
     try {
-      await updateDoc(doc(db, "users", user.uid), updated);
-    } catch (err) {
-      console.error("Profile update error:", err);
+      await updateDoc(userRef, updated);
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      // You can add toast notification here if needed
     }
   };
 
-  const handleSelectMatch = () => setActiveTab("messages");
-
-  /**
-   * 📦 Tabs
-   */
+  // Tabs Content
   const tabs: Record<string, React.ReactNode> = {
     messages: <MessagePage user={user} />,
     discovery: <DiscoveryPage user={user} onSelectMatch={handleSelectMatch} />,
@@ -72,7 +78,7 @@ function Home() {
       <ProfilePage
         profile={profile}
         onUpdate={handleProfileUpdate}
-        isOwnProfile
+        isOwnProfile={true}
       />
     ),
   };
@@ -84,7 +90,7 @@ function Home() {
       activeTab={activeTab}
       onTabChange={setActiveTab}
     >
-      {tabs[activeTab]}
+      {tabs[activeTab] || null}
     </MainLayout>
   );
 }
