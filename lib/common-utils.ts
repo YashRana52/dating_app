@@ -139,7 +139,7 @@ export const fileUtils = {
   },
 
   validateFiles: (
-    files: FileList | null,
+    files: FileList | File[] | null, // ✅ accept File[] too
     maxFiles: number = MAX_PHOTOS
   ): File[] => {
     if (!files) return [];
