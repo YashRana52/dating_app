@@ -1,29 +1,22 @@
 import { UserProfile } from "@/lib/types";
 import React from "react";
 import { Button } from "./ui/button";
-import {
-  Dislike as DislikeIconRaw,
-  Like as LikeIconRaw,
-  Message as MessageIconRaw,
-  Rewind as RewindIconRaw,
-  Superlike as SuperlikeIconRaw,
-} from "./ActionIcon";
 
 // Wrap icons with proper SVG props typing
 const RewindIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <RewindIconRaw {...props} />
+  <RewindIcon {...props} />
 );
 const DislikeIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <DislikeIconRaw {...props} />
+  <DislikeIcon {...props} />
 );
 const LikeIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <LikeIconRaw {...props} />
+  <LikeIcon {...props} />
 );
 const SuperlikeIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <SuperlikeIconRaw {...props} />
+  <SuperlikeIcon {...props} />
 );
 const MessageIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <MessageIconRaw {...props} />
+  <MessageIcon {...props} />
 );
 
 interface FloatingActionButtonProps {
