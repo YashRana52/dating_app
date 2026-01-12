@@ -616,7 +616,7 @@ export default function PremiumChat({
                 previewConfig={{ showPreview: false }}
                 width={320}
                 height={400}
-                skinTonePickerLocation="none"
+                skinTonePickerLocation={undefined}
               />
             </motion.div>
           )}
