@@ -90,7 +90,7 @@ export default function MatchePage({ user, onSelectMatch }: MatchPageProps) {
     return (
       <ProfilePage
         profile={viewProfile}
-        isOwnerProfile={false}
+        isOwnProfile={false}
         onBack={handleBackFromProfile}
         onStartChat={() => {
           handleStartChat(viewProfile);
