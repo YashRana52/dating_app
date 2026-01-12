@@ -10,7 +10,7 @@ import { PLACEHOLDERS } from "@/lib/common-utils";
 import { cn } from "@/lib/utils";
 
 interface ConversationWithProfile extends Conversation {
-  otherUser?: UserProfile;
+  otherUser: UserProfile; // ✅ now always defined after filtering
 }
 
 interface ConversationListProps {
@@ -49,17 +49,26 @@ export default function ConversationList({
           })
         );
 
-        // Filter out conversations with null otherUser and sort by last message time descending
-        const validConversations = convWithProfiles.filter(
-          (conv) => conv.otherUser !== null
-        );
+        // Filter out null/undefined otherUser & narrow types
+        const hasUserProfile = (
+          conv: Conversation & { otherUser?: UserProfile | null }
+        ): conv is Conversation & { otherUser: UserProfile } => {
+          return conv.otherUser != null;
+        };
+
+        const validConversations = convWithProfiles.filter(hasUserProfile);
+
+        // Sort by last message time descending
         validConversations.sort((a, b) => {
           const ta = a.lastMessageTime?.toMillis?.() ?? 0;
           const tb = b.lastMessageTime?.toMillis?.() ?? 0;
           return tb - ta;
         });
 
-        setConversations(validConversations);
+        // validConversations is narrowed by hasUserProfile above; assert via unknown to satisfy TS
+        setConversations(
+          validConversations as unknown as ConversationWithProfile[]
+        );
         setLoading(false);
       }
     );
@@ -68,12 +77,26 @@ export default function ConversationList({
   }, [user?.uid]);
 
   const filteredConversations = conversations.filter((c) =>
-    c.otherUser?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    c.otherUser.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const formatTime = (timestamp: any) => {
+  type TimestampLike =
+    | { toDate: () => Date }
+    | Date
+    | number
+    | null
+    | undefined;
+
+  const isTimestampWithToDate = (t: unknown): t is { toDate: () => Date } =>
+    !!t && typeof (t as { toDate?: unknown }).toDate === "function";
+
+  const formatTime = (timestamp: TimestampLike): string => {
     if (!timestamp) return "";
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    const date = isTimestampWithToDate(timestamp)
+      ? timestamp.toDate()
+      : timestamp instanceof Date
+      ? timestamp
+      : new Date(timestamp as number);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMin = Math.floor(diffMs / 60000);
@@ -188,7 +211,7 @@ export default function ConversationList({
               return (
                 <button
                   key={conv.id}
-                  onClick={() => other && onSelectConversation(conv.id, other)}
+                  onClick={() => onSelectConversation(conv.id, other)}
                   className={cn(
                     "w-full group flex items-center gap-4 p-4 rounded-2xl transition-all duration-200",
                     "bg-white/5 hover:bg-white/10 border border-white/5",
@@ -199,16 +222,16 @@ export default function ConversationList({
                   <div className="relative shrink-0">
                     <Avatar className="w-16 h-16 border-2 border-black/40 shadow-xl shadow-black/30">
                       <AvatarImage
-                        src={other?.photos?.[0] || PLACEHOLDERS.AVATAR}
-                        alt={other?.name}
+                        src={other.photos?.[0] || PLACEHOLDERS.AVATAR}
+                        alt={other.name}
                         className="object-cover"
                       />
                       <AvatarFallback className="bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-semibold">
-                        {other?.name?.[0] || "?"}
+                        {other.name[0] || "?"}
                       </AvatarFallback>
                     </Avatar>
 
-                    {other?.isOnline && (
+                    {other.isOnline && (
                       <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-emerald-500 border-2 border-black rounded-full shadow-lg shadow-emerald-900/40" />
                     )}
                   </div>
@@ -221,7 +244,7 @@ export default function ConversationList({
                           hasUnread ? "text-white" : "text-white/90"
                         )}
                       >
-                        {other?.name || "Deleted User"}
+                        {other.name}
                       </h3>
                       <span className="text-xs text-white/40 shrink-0 font-medium">
                         {formatTime(conv.lastMessageTime)}
