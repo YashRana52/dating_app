@@ -2,12 +2,29 @@ import { UserProfile } from "@/lib/types";
 import React from "react";
 import { Button } from "./ui/button";
 import {
-  DislikeIcon,
-  LikeIcon,
-  MessageIcon,
-  RewindIcon,
-  SuperlikeIcon,
+  Dislike as DislikeIconRaw,
+  Like as LikeIconRaw,
+  Message as MessageIconRaw,
+  Rewind as RewindIconRaw,
+  Superlike as SuperlikeIconRaw,
 } from "./ActionIcon";
+
+// Wrap icons with proper SVG props typing
+const RewindIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <RewindIconRaw {...props} />
+);
+const DislikeIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <DislikeIconRaw {...props} />
+);
+const LikeIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <LikeIconRaw {...props} />
+);
+const SuperlikeIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <SuperlikeIconRaw {...props} />
+);
+const MessageIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <MessageIconRaw {...props} />
+);
 
 interface FloatingActionButtonProps {
   onAction: (
@@ -27,7 +44,7 @@ export default function FloatingActionButton({
   const isLoading = (action: string) => actionLoading === action;
 
   return (
-    <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 translate-y-1/2 z-50 pointer-events-auto ">
+    <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 translate-y-1/2 z-50 pointer-events-auto">
       <div
         className="
           flex items-center justify-center gap-4 
@@ -38,7 +55,7 @@ export default function FloatingActionButton({
           ring-1 ring-white/5
         "
       >
-        {/* Rewind - Small */}
+        {/* Rewind */}
         <ActionBtn
           onClick={() => onAction("rewind")}
           loading={isLoading("rewind")}
@@ -96,7 +113,7 @@ export default function FloatingActionButton({
   );
 }
 
-// Reusable button with modern effects
+// Reusable button
 type ActionBtnProps = {
   children: React.ReactNode;
   onClick: () => void;
