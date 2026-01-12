@@ -1,6 +1,7 @@
 "use client";
 
 import EditProfileModal from "@/components/EditProfileModal";
+
 import {
   calculateProfileCompletion,
   localStorageUtils,
@@ -20,6 +21,7 @@ import {
   ChevronUp,
   Cigarette,
   Dessert,
+  Dog,
   DumbbellIcon,
   Edit3,
   GraduationCap,
@@ -30,7 +32,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-import React, { useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 interface ProfilePageProps {
@@ -40,33 +42,6 @@ interface ProfilePageProps {
   onBack?: () => void;
   onStartChat?: () => void;
 }
-
-interface ProfileSectionProps {
-  title: string;
-  children: React.ReactNode;
-  editable?: boolean;
-  onEdit?: () => void;
-}
-
-const ProfileSection: React.FC<ProfileSectionProps> = ({
-  title,
-  children,
-  editable,
-  onEdit,
-}) => (
-  <div
-    className={`bg-black/30 backdrop-blur-lg rounded-2xl p-5 border border-white/8 ${
-      editable ? "hover:border-white/20 cursor-pointer transition-colors" : ""
-    }`}
-    onClick={editable ? onEdit : undefined}
-  >
-    <div className="flex justify-between items-center mb-3.5">
-      <h3 className="text-lg font-semibold text-white/90">{title}</h3>
-      {editable && <Edit3 size={18} className="text-white/50" />}
-    </div>
-    <div className="text-gray-300 text-[15px] leading-relaxed">{children}</div>
-  </div>
-);
 
 function ProfilePage({
   profile,
@@ -180,6 +155,7 @@ function ProfilePage({
       </div>
     );
   }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-gray-950 to-black flex items-start justify-center p-4 md:p-6">
       <div className="w-full max-w-md mx-auto relative">
@@ -454,7 +430,17 @@ function ProfilePage({
 
 export default ProfilePage;
 
-const ProfileSection = ({ title, children, editable, onEdit }) => (
+const ProfileSection = ({
+  title,
+  children,
+  editable = false,
+  onEdit,
+}: {
+  title: string;
+  children: ReactNode;
+  editable?: boolean;
+  onEdit?: () => void;
+}) => (
   <div
     className={`bg-black/30 backdrop-blur-lg rounded-2xl p-5 border border-white/8 ${
       editable ? "hover:border-white/20 cursor-pointer transition-colors" : ""
@@ -469,7 +455,15 @@ const ProfileSection = ({ title, children, editable, onEdit }) => (
   </div>
 );
 
-const InfoRow = ({ icon, label, value }) => (
+const InfoRow = ({
+  icon,
+  label,
+  value,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string | number | undefined;
+}) => (
   <div className="flex items-center justify-between py-2.5 border-b border-white/5 last:border-0">
     <div className="flex items-center gap-3 text-gray-400">
       {icon}
